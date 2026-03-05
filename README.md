@@ -126,11 +126,32 @@ Displayed information includes:
 
 Compile using **g++**:
 
+**Debugging With GDB**
 ```
-g++ -std=c++17 -Wall -Wextra src/*.cpp -o sysmon
+g++ -std=c++17 -g -Wall -Wextra -Iinclude src/*.cpp -o sysmon
+```
+ check error with **gdb**
+ ```
+ run
+
+ ```
+---
+
+## Build with CMAKE
+
+Generate -o file
+
+```
+make
+
 ```
 
----
+To clean build file
+
+```
+make clean
+
+```
 
 ## Run
 
@@ -141,6 +162,21 @@ g++ -std=c++17 -Wall -Wextra src/*.cpp -o sysmon
 The program will start displaying real-time system statistics.
 
 ---
+
+**How to Install in System**
+
+```
+sudo make install
+
+```
+
+**How to remove**
+
+```
+sudo make uninstall
+
+```
+
 
 ## Example Output
 
