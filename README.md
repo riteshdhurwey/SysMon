@@ -111,9 +111,14 @@ build/
 ```bash
 git clone https://github.com/riteshdhurwey/SysMon.git
 cd SysMon
-mkdir build && cd build
-cmake ..
+```
+To make exe file
+```
 make
+```
+Clean file
+```
+make clean
 ```
 
 ### Run
