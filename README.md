@@ -1,55 +1,60 @@
 # SysMon 🖥️
+A lightweight, real-time Linux system monitoring tool written in **modern C++** that reads system metrics directly from the Linux `/proc` filesystem and `statvfs` — **no external dependencies except ncurses**.
 
-A lightweight, real-time Linux system monitoring tool written in **modern C++** that reads system metrics directly from the Linux `/proc` filesystem and `statvfs` — **zero external dependencies**.
-
-```
-========== CPU ==========
-Total Usage: 12.4%
-User: 8.1%   System: 3.2%   Idle: 87.6%
-IOWait: 0.8%   IRQ: 0.1%   SoftIRQ: 0.2%
-
-========== MEMORY ==========
-Total: 7812 MB
-Used : 4921 MB
-Free : 2891 MB
-Usage: 63.0%
-
-========== DISK ==========
-Total: 124.76 GB
-Used : 90.63 GB
-Free : 27.45 GB
-Usage: 77.99%
-
-========== TOP PROCESSES ==========
-PID     NAME                STATE   MEM(MB)     CPU%
-1234    firefox             S       512         4.21
-5678    clang++             R       210         2.10
-...
-```
+![Demo](https://img.shields.io/badge/platform-Linux-blue) ![C++17](https://img.shields.io/badge/C++-17-green) ![ncurses](https://img.shields.io/badge/TUI-ncurses-cyan)
 
 ---
 
+[![SysMon Demo](https://asciinema.org/a/ZPgR7oLSwYV1wnG1.svg)](https://asciinema.org/a/ZPgR7oLSwYV1wnG1)
 ## Features
 
-- **CPU usage** — real-time user, system, idle, iowait, IRQ, softIRQ breakdown via `/proc/stat`
-- **Memory usage** — total, used, available via `/proc/meminfo`
-- **Disk usage** — total, used, free, usage% via `statvfs()` (matches `df -h` output)
-- **Top 10 processes** — sorted by CPU%, with PID, name, state, and resident memory via `/proc/[pid]/stat` and `/proc/[pid]/status`
-- Refreshes every **1 second** with screen clear
+### System Monitoring
+- **CPU usage** — real-time total%, user, system, idle, iowait, IRQ, softIRQ via `/proc/stat`
+- **Memory usage** — used/total GB with usage bar via `/proc/meminfo`
+- **Disk usage** — used/total GB with usage bar via `statvfs()`
+- **System uptime** — displayed in header via `/proc/uptime`
+- Refreshes every **1 second**
+
+### Process Management
+- **Full process list** — PID, name, CPU%, state, memory
+- **Scrollable list** — navigate with ↑↓ arrow keys
+- **Sort processes** — by CPU%, Memory, or PID (toggle ascending/descending)
+- **Kill process** — press K on selected process, confirm with Y/N
+- **Stable selection** — tracks process by PID across re-sorts and updates
+- **Kernel thread filtering** — hides zero-memory kernel threads
+
+### TUI (ncurses)
+- **Window-based layout** — separate window per stat section
+- **Color coded bars** — green/yellow/red based on usage thresholds
+- **Pause on scroll** — list freezes while navigating, resumes after 1s idle
+- **Help overlay** — press H for keyboard shortcuts
+- **Terminal resize** — windows rebuild on resize
+
+---
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| ↑ / ↓ | Scroll process list |
+| C | Sort by CPU% |
+| M | Sort by Memory |
+| P | Sort by PID |
+| K | Kill selected process |
+| H | Toggle help window |
+| Q | Quit |
 
 ---
 
 ## How It Works
 
-SysMon reads directly from the Linux kernel's virtual filesystem — no `top`, no `ps`, no external libraries.
+SysMon reads directly from the Linux kernel's virtual filesystem — no `top`, no `ps`, no shell commands.
 
 ### CPU Usage (Delta Sampling)
 Linux exposes cumulative CPU ticks in `/proc/stat`. A single snapshot is meaningless — SysMon takes **two snapshots with a time delta** and calculates the percentage change:
-
 ```
 cpu_usage% = (1 - idle_delta / total_delta) * 100
 ```
-
 Where `idle_delta` includes both `idle` and `iowait` ticks — the same method used by `htop`.
 
 ### Memory
@@ -74,30 +79,34 @@ Each process's CPU usage is calculated using the same delta method — two reads
 process_cpu% = (proc_delta / total_cpu_delta) * 100
 ```
 
+### Stable Process Selection
+Process list re-sorts every second. Instead of tracking by index (which changes on every sort), SysMon tracks the **selected process by PID** — re-syncing the index after each update so the highlight follows the correct process.
+
 ---
 
 ## Project Structure
+
 ```
 sysmon/
-include/
-    cpu.h
-    ResouceMonitor.h // RAM & Disk Combined
-    process.h
-    CPUUtils.h
-    display.h
-    systemMonitor.h
-
-src/
-    main.cpp
-    cpu.cpp
-    ResourceMonitorcpp
-    process.cpp
-    display.cpp
-    systemMonitor.cpp
-
-build/
-    sysmon
+├── include/
+│   ├── CPUUtils.h        # /proc/stat reader (shared)
+│   ├── cpu.h             # CPUMonitor class
+│   ├── ResourceMonitor.h # RAM & Disk combined
+│   ├── process.h         # ProcessMonitor class
+│   ├── systemMonitor.h   # Top-level monitor
+|   ├── sysinfo.h 
+│   └── ui.h              # ncurses TUI class
+     
+└── src/
+    ├── main.cpp
+    ├── cpu.cpp
+    ├── ResourceMonitor.cpp
+    ├── process.cpp
+    ├── systemMonitor.cpp
+    ├── sysinfo.cpp 
+    └── ui.cpp
 ```
+
 ---
 
 ## Build & Run
@@ -105,20 +114,22 @@ build/
 ### Requirements
 - Linux (kernel 2.6+)
 - g++ with C++17 support
-- CMake 3.10+
+- ncurses (`libncurses-dev`)
+
+### Install ncurses
+```bash
+# Debian/Ubuntu
+sudo apt install libncurses-dev
+
+# Arch
+sudo pacman -S ncurses
+```
 
 ### Build
 ```bash
 git clone https://github.com/riteshdhurwey/SysMon.git
 cd SysMon
-```
-To make exe file
-```
 make
-```
-Clean file
-```
-make clean
 ```
 
 ### Run
@@ -126,16 +137,22 @@ make clean
 ./sysmon
 ```
 
-Press `Ctrl+C` to exit.
+Press `Q` to exit.
+
+### Clean
+```bash
+make clean
+```
 
 ---
 
 ## /proc Files Used
 
 | File | Purpose |
-|---|---|
+|------|---------|
 | `/proc/stat` | System-wide CPU tick counters |
 | `/proc/meminfo` | Memory totals and availability |
+| `/proc/uptime` | System uptime in seconds |
 | `/proc/[pid]/stat` | Per-process CPU time (utime + stime) |
 | `/proc/[pid]/status` | Per-process resident memory (VmRSS) |
 | `/proc/[pid]/comm` | Process name |
@@ -145,10 +162,14 @@ Press `Ctrl+C` to exit.
 
 ## Roadmap
 
-- [ ] Per-core CPU breakdown
-- [ ] ANSI color output (red when CPU > 80%)
-- [ ] ncurses TUI
+- [x] Real-time CPU, Memory, Disk monitoring
+- [x] ncurses TUI with windowed layout
+- [x] Scrollable, sortable process list
+- [x] Kill process feature
+- [x] System uptime
 - [ ] Network I/O from `/proc/net/dev`
+- [ ] Per-core CPU breakdown
+- [ ] User column in process list
 - [ ] `--interval` and `--top N` CLI flags
 - [ ] Metric logging to CSV
 
