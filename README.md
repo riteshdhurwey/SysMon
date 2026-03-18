@@ -157,6 +157,7 @@ make clean
 | `/proc/[pid]/status` | Per-process resident memory (VmRSS) |
 | `/proc/[pid]/comm` | Process name |
 | `statvfs()` syscall | Disk block counts and sizes |
+| ` /proc/net/dev` | Network State
 
 ---
 
@@ -167,7 +168,7 @@ make clean
 - [x] Scrollable, sortable process list
 - [x] Kill process feature
 - [x] System uptime
-- [ ] Network I/O from `/proc/net/dev`
+- [x] Network I/O from `/proc/net/dev`
 - [ ] Per-core CPU breakdown
 - [ ] User column in process list
 - [ ] `--interval` and `--top N` CLI flags

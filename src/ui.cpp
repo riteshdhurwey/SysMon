@@ -118,13 +118,18 @@ void UI::initColors() {
 }
 
 void UI::createWindows() {
-    headerWin = newwin(1,              termCols, 0,        0);
-    diskWin   = newwin(3,              termCols, 1,        0);
-    memWin    = newwin(3,              termCols, 4,        0);
-    cpuWin    = newwin(4,              termCols, 7,        0);
-    procWin   = newwin(termRows - 12,  termCols, 11,       0);
-    statusWin = newwin(1,              termCols, termRows - 1, 0);
-    
+    int leftWidth  = termCols / 2;
+    int rightStart = termCols / 2 + 1;
+    int rightWidth = termCols - rightStart;
+
+    headerWin = newwin(1,          termCols,   0,  0);
+    diskWin   = newwin(3,          leftWidth,  1,  0);
+    memWin    = newwin(3,          leftWidth,  4,  0);
+    cpuWin    = newwin(4,          leftWidth,  7,  0);
+    netWin    = newwin(10,         rightWidth, 1,  rightStart);
+    procWin   = newwin(termRows-12,termCols,   11, 0);
+    statusWin = newwin(1,          termCols,   termRows-1, 0);
+
 }
 
 void UI::destroyWindows() {
@@ -135,6 +140,7 @@ void UI::destroyWindows() {
     if (procWin)   { delwin(procWin);   procWin   = nullptr; }
     if (statusWin) { delwin(statusWin); statusWin = nullptr; }
     if (helpWin) { delwin(helpWin); helpWin = nullptr; }
+    if(netWin)  {delwin(netWin); netWin = nullptr;};
 }
 
 
@@ -182,7 +188,7 @@ void UI::drawDisk(const DiskUsage& disk) {
     werase(diskWin);
     drawWinTitle(diskWin, "DISK");
 
-    int bw = (termCols / 2) - 10;
+    int bw = ((termCols/2) / 2) - 10;
     mvwprintw(diskWin, 1, 2, "%5.1f / %5.1f GB", disk.usedGB, disk.totalGB);
     drawBar(diskWin, 1, 22, bw, disk.percent);
     mvwprintw(diskWin, 1, 22 + bw + 3, "%3.0f%%", disk.percent);
@@ -194,7 +200,7 @@ void UI::drawMemory(const MemoryUsage& mem) {
     werase(memWin);
     drawWinTitle(memWin, "MEMORY");
 
-    int bw = (termCols / 2) - 10;
+    int bw = ((termCols/2) / 2) - 10;
     mvwprintw(memWin, 1, 2, "%5.1f / %5.1f GB",
               mem.usedKB / 1024.0 / 1024.0,
               mem.totalKB / 1024.0 / 1024.0);
@@ -208,7 +214,7 @@ void UI::drawCPU(const CPUUsage& cpu) {
     werase(cpuWin);
     drawWinTitle(cpuWin, "CPU");
 
-    int bw = (termCols / 2) - 10;
+    int bw = ((termCols/2) / 2) - 10;
     mvwprintw(cpuWin, 1, 2, "%5.1f%%", cpu.total);
     drawBar(cpuWin, 1, 22, bw, cpu.total);
     mvwprintw(cpuWin, 1, 22 + bw + 3, "%3.0f%%", cpu.total);
@@ -312,6 +318,7 @@ void UI::draw(const SystemMonitor& mon) {
     drawCPU(mon.getCPUUsage());
     drawProcessHeader();
     drawProcessList(procs);
+    drawNetStat(mon.getNetStat());
 
     if (!procs.empty() && selectedRow < (int)procs.size())
         drawStatus(procs[selectedRow]);
@@ -380,4 +387,34 @@ void UI::drawKill(int pid,std::string procName) {
     mvwprintw(killWin, 1, 2, "Kill PID %-3d %-4s?", pid,procName.c_str());
     mvwprintw(killWin, 3, 14, "[Y] Yes      [N] No");
     wrefresh(killWin);
+}
+
+void UI::drawNetStat(const NetworkInfo& info) {
+    werase(netWin);
+    drawWinTitle(netWin, "NETWORK");
+
+    int y = 1;
+for (const auto& iface : info.stat) {
+    if (iface.interface == "lo") continue;
+
+    // RX
+    double rxSpeed = iface.rxKBps;
+    std::string rxUnit = "KB/s";
+    if (rxSpeed >= 1024.0) { rxSpeed /= 1024.0; rxUnit = "MB/s"; }
+
+    // TX
+    double txSpeed = iface.txKBps;
+    std::string txUnit = "KB/s";
+    if (txSpeed >= 1024.0) { txSpeed /= 1024.0; txUnit = "MB/s"; }
+
+    mvwprintw(netWin, y, 2, "%-8s RX:%7.1f %s  TX:%7.1f %s",
+              iface.interface.c_str(),
+              rxSpeed, rxUnit.c_str(),
+              txSpeed, txUnit.c_str());
+    y++;
+}
+    mvwprintw(netWin, y+1, 2, "TCP: %-5d  UDP: %-5d",
+              info.tcpConnections, info.udpConnections);
+
+    wrefresh(netWin);
 }

@@ -19,8 +19,14 @@ void SystemMonitor::update(){
     cpu.update();
     resource.update();
     processMonitor.update();
+    networkMonitor.update();
+}
+
+const NetworkInfo& SystemMonitor::getNetStat() const{
+    return networkMonitor.getNetInfo();
 }
 
 void SystemMonitor::sortProcessBy(SortBy criterion){
     processMonitor.sortBy(criterion);
 }
+

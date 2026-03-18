@@ -19,6 +19,7 @@ private:
     WINDOW* statusWin = nullptr;
     WINDOW* helpWin   = nullptr;
     WINDOW* killWin = nullptr;
+    WINDOW* netWin = nullptr;
     // state
     int selectedPid  = -1;
     int selectedRow  = 0;
@@ -51,6 +52,7 @@ private:
     void drawStatus(const Process& sel);
     void drawHelp();
     void drawKill(int pid,std::string procName);
+    void drawNetStat(const NetworkInfo& info);
 
     sysInfo sysinfo;
 
