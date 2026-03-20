@@ -1,2 +1,18 @@
-*.txt
+# Personal notes
+cpuMonitorNote.txt
+dubuggerGuide.txt
+processMonitorNote.txt
+project_flowChart.txt
+
+# Build files
 *.o
+*.o%
+*.a
+*.so
+
+# Build directory
+build/
+
+# Binaries
+sysmon
+test_all
