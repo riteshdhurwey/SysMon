@@ -5,6 +5,7 @@ A lightweight, real-time Linux system monitor written in **modern C++17** — re
 ![Platform](https://img.shields.io/badge/platform-Linux-blue)
 ![C++17](https://img.shields.io/badge/C++-17-green)
 ![TUI](https://img.shields.io/badge/TUI-ncurses-cyan)
+![CI](https://github.com/riteshdhurwey/SysMon/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ---
