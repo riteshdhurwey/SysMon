@@ -149,21 +149,20 @@ sudo pacman -S ncurses
 ```bash
 git clone https://github.com/riteshdhurwey/SysMon.git
 cd SysMon
+mkdir build
+cd build 
+cmake ..
 make
+
 ./sysmon
+
+make clean
 ```
 
 ### Run Tests
 
-```bash
-# CPU tests
-g++ tests/test_cpu.cpp src/cpu.cpp -Iinclude -o test_cpu && ./test_cpu
-
-# Memory & Disk tests
-g++ tests/test_resource.cpp src/ResourceMonitor.cpp -Iinclude -o test_resource && ./test_resource
-
-# Process tests
-g++ tests/test_process.cpp src/process.cpp src/CPUUtils.cpp -Iinclude -o test_process && ./test_process
+```
+make && ./test_all
 ```
 
 ---
