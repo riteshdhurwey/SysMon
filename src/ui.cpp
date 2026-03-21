@@ -215,9 +215,9 @@ void UI::drawCPU(const CPUUsage& cpu) {
     drawWinTitle(cpuWin, "CPU");
 
     int bw = ((termCols/2) / 2) - 10;
-    mvwprintw(cpuWin, 1, 2, "%5.1f%%", cpu.total);
+    mvwprintw(cpuWin, 1, 2, "CPU ");
     drawBar(cpuWin, 1, 22, bw, cpu.total);
-    mvwprintw(cpuWin, 1, 22 + bw + 3, "%3.0f%%", cpu.total);
+    mvwprintw(cpuWin, 1, 22 + bw + 3, "%5.1f%%", cpu.total);
 
     wattron(cpuWin, COLOR_PAIR(C_DIM));
     mvwprintw(cpuWin, 2, 2, "usr:%4.1f%%  sys:%4.1f%%  idl:%4.1f%%  iow:%4.1f%%",

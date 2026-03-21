@@ -196,6 +196,9 @@ make && ./test_all
 - [ ] Metric logging to CSV
 
 ---
+## Contributing
+
+Contributions are welcome! Check out the [Contributing Guide](CONTRIBUTING.md) for how to get started and a list of features you can work on.
 
 ## Author
 
