@@ -38,6 +38,9 @@ private:
     void createWindows();
     void destroyWindows();
 
+    int totalProcess = 0;
+    int totalZombieProcess = 0;
+
     // helpers
     void drawBar(WINDOW* win, int y, int x, int width, double percent);
     void drawWinTitle(WINDOW* win, const char* title);

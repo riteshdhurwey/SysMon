@@ -6,6 +6,7 @@
 #include<thread>
 #include<algorithm>
 #include "CPUUtils.h"  // for CPUStats and readCPUStats()
+#include<unistd.h>
 
 enum class SortBy{
     CPU,MEM,PID
@@ -16,17 +17,19 @@ struct Process {
     std::string state;   // Process state (R, S, D, Z, etc.)
     long memoryKB;       // Resident memory in KB
     double cpuPercent;   // CPU usage %
+    long runtime;
 };
 
 class ProcessMonitor {
 private:
     std::vector<Process> processes;  // All processes
-
+    int totalProcess = 0;
+    int totalZombieProcess = 0;
     SortBy currentSort = SortBy::CPU;
     bool sortAscending = false;
 
     std::vector<int> getAllPids();             // Scan /proc for all PIDs
-    unsigned long long readProcessCPU(int pid); // utime + stime from /proc/[pid]/stat
+    unsigned long long readProcessCPU(int pid,long &starttime); // utime + stime from /proc/[pid]/stat
     long readProcessMemory(int pid);           // Resident memory in KB from /proc/[pid]/statm
     std::string readProcessName(int pid);      // Process name from /proc/[pid]/comm
     std::string readProcessState(int pid);     // Process state from /proc/[pid]/stat
@@ -35,4 +38,7 @@ public:
     void update();                              // Updates CPU %, memory, name, state for top processes
     const std::vector<Process>& getProcesses() const; 
     void sortBy(SortBy criterion);
+
+    int getTotoalProcess() const;
+    int getZombieProcess() const;
 };

@@ -31,7 +31,7 @@ Built as a deep-dive into Linux systems programming: `/proc` parsing, delta samp
 - Refreshes every **1 second**
 
 ### Process Management
-- Full process list — PID, name, CPU%, state, memory (RSS)
+- Full process list — PID, name, CPU%, state, memory (RSS) ,Process runtime ,total/zombie count to process list
 - Scrollable with ↑↓ arrow keys
 - Sort by CPU%, Memory, or PID (toggle ascending/descending)
 - Kill process — press `K`, confirm with `Y/N`

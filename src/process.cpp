@@ -15,7 +15,7 @@ std::vector<int> ProcessMonitor::getAllPids(){
     return pids;
 }
 
-unsigned long long ProcessMonitor::readProcessCPU(int pid) {
+unsigned long long ProcessMonitor::readProcessCPU(int pid,long &starttime) {
     std::ifstream file("/proc/" + std::to_string(pid) + "/stat");
     if (!file) return 0;
 
@@ -26,6 +26,11 @@ unsigned long long ProcessMonitor::readProcessCPU(int pid) {
         file >> tmp;
 
     file >> utime >> stime;
+
+    for(int i = 16 ;i<=21;i++)
+    file >> tmp;
+
+    file >> starttime;
 
     return utime + stime; //utime → CPU time in user mode
                          //stime → CPU time in kernel mode
@@ -77,25 +82,35 @@ std::string ProcessMonitor::readProcessState(int pid) {
     return std::string(1, fullLine[pos + 2]);
 }
 void ProcessMonitor::update() {
-
+    totalZombieProcess = 0;
     processes.clear();
 
     std::vector<int> pids = getAllPids();
 
+    totalProcess = pids.size();
+
     std::unordered_map<int, unsigned long long> cpuA;
     std::unordered_map<int, unsigned long long> cpuB;
 
+    std::unordered_map<int, long> starttimes;
+    long st = 0;
+
     CPUStats totalA = readCPUStats();
-
-    for (int pid : pids)
-        cpuA[pid] = readProcessCPU(pid); //Save CPU time for each process (snapshot A)
-
+    for (int pid : pids){
+        cpuA[pid] = readProcessCPU(pid,st); //Save CPU time for each process (snapshot A)
+        starttimes[pid] = st;
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     CPUStats totalB = readCPUStats();
 
+        long ticks = sysconf(_SC_CLK_TCK);
+        double uptime = 0;
+        std::ifstream f("/proc/uptime");
+        f >> uptime;
+
     for (int pid : pids)
-        cpuB[pid] = readProcessCPU(pid); //Save CPU time for each process (snapshot B)
+        cpuB[pid] = readProcessCPU(pid,st); //Save CPU time for each process (snapshot B)
 
         //This calculates how much total CPU time passed during the interval.
     unsigned long long totalDelta =
@@ -115,9 +130,11 @@ void ProcessMonitor::update() {
 
         Process p;
 
+        p.runtime = (long)(uptime - (starttimes[pid]/(double)ticks));
         p.pid = pid;
         p.name = readProcessName(pid);
         p.state = readProcessState(pid);
+        if(p.state == "Z") totalZombieProcess++;
         p.memoryKB = readProcessMemory(pid);
         p.cpuPercent = cpuPercent;
         if(p.memoryKB == 0) continue;
@@ -157,3 +174,10 @@ void ProcessMonitor::sortBy(SortBy criterion) {
 
 }
 
+int ProcessMonitor::getTotoalProcess() const{
+    return totalProcess;
+}
+
+int ProcessMonitor::getZombieProcess()const {
+    return totalZombieProcess;
+}

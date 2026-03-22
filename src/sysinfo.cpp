@@ -21,3 +21,22 @@ std::string sysInfo::getupTime(){
     snprintf(buf, sizeof(buf), "%dd %02d:%02d:%02d", days, hours, minutes, seconds);
     return std::string(buf);
 }
+
+std::string sysInfo::format_ps_time(double runtime_sec) {
+    int total = static_cast<int>(runtime_sec);
+
+    int days = total / 86400;
+    int hours = (total % 86400) / 3600;
+    int minutes = (total % 3600) / 60;
+    int seconds = total % 60;
+
+    std::ostringstream out;
+
+
+    out << std::setw(2) << std::setfill('0') << days << "-"
+        << std::setw(2) << std::setfill('0') << hours << ":"
+        << std::setw(2) << std::setfill('0') << minutes << ":"
+        << std::setw(2) << std::setfill('0') << seconds;
+
+    return out.str();
+}

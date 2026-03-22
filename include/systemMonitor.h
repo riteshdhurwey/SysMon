@@ -26,5 +26,9 @@ public:
 
     const NetworkInfo& getNetStat() const;
 
+     int getTotalProcess()const ;
+
+     int getTotalZombieProcess() const ;
+
     void sortProcessBy(SortBy criterion);
 };

@@ -231,18 +231,23 @@ void UI::drawProcessHeader() {
     werase(procWin);
     drawWinTitle(procWin, "PROCESSES");
 
-    wattron(procWin, A_BOLD | A_UNDERLINE);
-    mvwprintw(procWin, 1, 2, "%-7s %-16s %-9s %-6s %s",
-          "PID", "NAME", "CPU%", "STATE", "MEM(MB)");
+    // Tasks row
+    mvwprintw(procWin, 1, 2, "Tasks: %d  |  Zombie: %d", totalProcess, totalZombieProcess);
 
+    // Header row
+    wattron(procWin, A_BOLD | A_UNDERLINE);
+    mvwprintw(procWin, 2, 2, "%-7s %-16s %-9s %-10s %-15s %s",
+         "PID", "NAME", "CPU%", "STATE", "TIME+", "MEM(MB)");
     wattroff(procWin, A_BOLD | A_UNDERLINE);
+
+    // Divider
+    //mvwhline(procWin, 3, 1, ACS_HLINE, getmaxx(procWin) - 2);
 }
 
 void UI::drawProcessList(const std::vector<Process>& procs) {
-    int visibleRows = getmaxy(procWin) - 3;  // minus top border + header + bottom border
+    int visibleRows = getmaxy(procWin) - 4;  // minus top border + header + bottom border
     int total       = (int)procs.size();
     int maxOffset   = std::max(0, total - visibleRows);
-
     scrollOffset = std::max(0, std::min(scrollOffset, maxOffset));
 
     for (int i = 0; i < visibleRows && (scrollOffset + i) < total; i++) {
@@ -250,17 +255,17 @@ void UI::drawProcessList(const std::vector<Process>& procs) {
         if(p.memoryKB == 0)continue;
         int absIdx = scrollOffset + i;
         bool sel   = (absIdx == selectedRow);
-        int y      = i + 2;
+        int y      = i + 3;
 
         mvwhline(procWin, y, 1, ' ', termCols - 2); // clear line first
 
         if (sel) wattron(procWin, A_REVERSE | A_BOLD);
         char cpuStr[16];
         snprintf(cpuStr, sizeof(cpuStr), "%.1f%%", p.cpuPercent);
-
-        mvwprintw(procWin, y, 2, "%-7d %-16s %-9s %-6s %ld",
+        std::string timeStr = sysinfo.format_ps_time(p.runtime);
+        mvwprintw(procWin, y, 2, "%-7d %-16s %-9s %-10s %-15s %ld",
                 p.pid, p.name.c_str(), cpuStr,
-                p.state.c_str(), p.memoryKB / 1024);
+                p.state.c_str(),timeStr.c_str(), p.memoryKB / 1024);
 
         if (sel) wattroff(procWin, A_REVERSE | A_BOLD);
     }
@@ -284,6 +289,8 @@ void UI::draw(const SystemMonitor& mon) {
 
     const auto& procs = mon.getProcesses();
 
+    totalProcess = mon.getTotalProcess();
+    totalZombieProcess = mon.getTotalZombieProcess();
     // sync selectedRow from pid
     std::string procName = "";
     for (int i = 0; i < (int)procs.size(); i++) {

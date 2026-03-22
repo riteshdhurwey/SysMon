@@ -30,3 +30,10 @@ void SystemMonitor::sortProcessBy(SortBy criterion){
     processMonitor.sortBy(criterion);
 }
 
+ int SystemMonitor::getTotalProcess() const{
+    return processMonitor.getTotoalProcess();
+ }
+
+  int SystemMonitor::getTotalZombieProcess() const{
+    return processMonitor.getZombieProcess();
+ }
