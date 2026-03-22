@@ -176,7 +176,7 @@ void UI::drawHeader() {
 
     std::string t = sysinfo.currentTime();
     std::string uptime = sysinfo.getupTime();
-    mvwprintw(headerWin, 0, 2, "SysMon v1.0");
+    mvwprintw(headerWin, 0, 2, "SysMon v0.2.0");
     mvwprintw(headerWin, 0, (termCols - (int)t.size()) / 2, "%s", t.c_str());
     mvwprintw(headerWin,0,termCols-20,"Uptime %s",uptime.c_str());
 

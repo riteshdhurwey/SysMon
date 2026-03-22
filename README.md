@@ -220,6 +220,13 @@ make && ./test_all
 - [ ] Bug fixes and performance improvements
 
 ---
+
+---
+
+> If you found SysMon useful, consider giving it a ⭐ — it helps others discover the project!
+
+---
+
 ## Contributing
 
 Contributions are welcome! Check out the [Contributing Guide](CONTRIBUTING.md) for how to get started and a list of features you can work on.
