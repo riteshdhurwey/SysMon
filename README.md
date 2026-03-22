@@ -9,9 +9,7 @@ A lightweight, real-time Linux system monitor written in **modern C++17** — re
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ---
-
-[![SysMon Demo](https://asciinema.org/a/UJdGYqylhvy7JUit.svg)](https://asciinema.org/a/UJdGYqylhvy7JUit)
-
+![demo](https://github.com/user-attachments/assets/5478a0c6-1843-4cf4-b846-2fd02d8b3707)
 ---
 
 ## Overview
@@ -189,11 +187,37 @@ make && ./test_all
 - [x] Scrollable, sortable process list
 - [x] Kill process feature
 - [x] System uptime display
-- [x] Unit + integration test suite
-- [ ] Per-core CPU breakdown
+- [x] GTest suite (7 passing tests)
+- [x] GitHub Actions CI
+
+### CPU
+- [ ] `--cpu` flag — detailed CPU stats (per-core usage, frequency)
+- [ ] Per-core CPU breakdown in TUI
+- [ ] CPU temperature via `/sys/class/thermal`
+
+### Memory
+- [ ] `--mem` flag — detailed memory breakdown (cached, buffers, swap usage)
+- [ ] Swap usage monitoring
+
+### Disk
+- [ ] `--disk` flag — per-partition breakdown
+- [ ] Disk read/write speed via `/proc/diskstats`
+- [ ] I/O wait per process
+
+### Network
+- [ ] `--net` flag — per-interface detailed stats (packets, errors, drops)
+- [ ] Network speed graph over time
+
+### Process
+- [ ] `--process` flag — detailed info for a specific PID
 - [ ] User column in process list
-- [ ] `--interval` and `--top N` CLI flags
+- [ ] Filter processes by name or user
+
+### General
+- [ ] `--interval N` flag — custom refresh rate in seconds
+- [ ] `--top N` flag — show only top N processes
 - [ ] Metric logging to CSV
+- [ ] Bug fixes and performance improvements
 
 ---
 ## Contributing
