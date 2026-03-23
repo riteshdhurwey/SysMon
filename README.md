@@ -153,8 +153,7 @@ sudo dnf install gcc-c++ cmake ncurses-devel
 ## Install
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/sysmon.git
-cd sysmon
+git clone https://github.com/riteshdhurwey/SysMon.git
 
 # Build
 mkdir build
