@@ -3,6 +3,7 @@ cpuMonitorNote.txt
 dubuggerGuide.txt
 processMonitorNote.txt
 project_flowChart.txt
+NOTES.md
 
 # Build files
 *.o

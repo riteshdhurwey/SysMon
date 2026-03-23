@@ -10,6 +10,9 @@ A lightweight, real-time Linux system monitor written in **modern C++17** — re
 
 ---
 ![demo](https://github.com/user-attachments/assets/5478a0c6-1843-4cf4-b846-2fd02d8b3707)
+
+---
+> ⭐ If you found this useful, consider starring the repo
 ---
 
 ## Overview
@@ -124,46 +127,90 @@ sysmon/
 ```
 
 ---
+# Installation Guide
 
-## Build & Run
+## Prerequisites
 
-### Requirements
-- Linux (kernel 2.6+)
-- g++ with C++17 support
-- ncurses (`libncurses-dev`)
+Make sure you have the following installed:
 
-### Install ncurses
-
+### Ubuntu/Debian
 ```bash
-# Debian/Ubuntu
-sudo apt install libncurses-dev
-
-# Arch
-sudo pacman -S ncurses
+sudo apt install build-essential cmake libncurses-dev
 ```
 
-### Build & Run
-
+### Arch Linux
 ```bash
-git clone https://github.com/riteshdhurwey/SysMon.git
-cd SysMon
-mkdir build
-cd build 
-cmake ..
-make
-
-./sysmon
-
-make clean
+sudo pacman -S base-devel cmake ncurses
 ```
 
-### Run Tests
-
-```
-make && ./test_all
+### Fedora
+```bash
+sudo dnf install gcc-c++ cmake ncurses-devel
 ```
 
 ---
+
+## Install
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/sysmon.git
+cd sysmon
+
+# Build
+mkdir build
+cd build
+cmake ..
+make
+
+# Install
+sudo make install sysmon
+```
+
+---
+
+## Uninstall
+```bash
+cd build
+sudo make uninstall 
+```
+
+---
+
+## Usage
+```bash
+sysmon
+```
+
+---
+
+## Running Tests
+
+### Install Google Test
+
+#### Ubuntu/Debian
+```bash
+sudo apt install libgtest-dev
+```
+
+#### Arch Linux
+```bash
+sudo pacman -S gtest
+```
+
+#### Fedora
+```bash
+sudo dnf install gtest-devel
+```
+
+### Run Tests
+```bash
+cd build
+make test
+
+./test_all
+```
+
+> **Note:** `sudo` is required for install/uninstall as it copies binary to `/usr/local/bin`
 
 ## /proc Files Used
 
@@ -219,13 +266,7 @@ make && ./test_all
 - [ ] Metric logging to CSV
 - [ ] Bug fixes and performance improvements
 
----
 
----
-
-> If you found SysMon useful, consider giving it a ⭐ — it helps others discover the project!
-
----
 
 ## Contributing
 

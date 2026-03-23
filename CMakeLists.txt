@@ -23,5 +23,10 @@ add_executable(test_all tests/test_all.cpp ${TEST_SRC})
 target_include_directories(test_all PRIVATE include)
 target_link_libraries(test_all GTest::GTest GTest::Main ncursesw tinfo pthread)
 
-# ── Install ───────────────────────────────────────────────────────────
+# ── Install / Uninstall ───────────────────────────────────────────────────────────
 install(TARGETS sysmon DESTINATION /usr/local/bin)
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -E remove /usr/local/bin/sysmon
+    COMMENT "Uninstalling sysmon..."
+)

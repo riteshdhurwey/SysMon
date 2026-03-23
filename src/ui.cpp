@@ -260,9 +260,12 @@ void UI::drawProcessList(const std::vector<Process>& procs) {
         mvwhline(procWin, y, 1, ' ', termCols - 2); // clear line first
 
         if (sel) wattron(procWin, A_REVERSE | A_BOLD);
+
         char cpuStr[16];
         snprintf(cpuStr, sizeof(cpuStr), "%.1f%%", p.cpuPercent);
+
         std::string timeStr = sysinfo.format_ps_time(p.runtime);
+        
         mvwprintw(procWin, y, 2, "%-7d %-16s %-9s %-10s %-15s %ld",
                 p.pid, p.name.c_str(), cpuStr,
                 p.state.c_str(),timeStr.c_str(), p.memoryKB / 1024);
