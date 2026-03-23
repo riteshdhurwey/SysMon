@@ -31,8 +31,8 @@ void UI::destroy() {
 
 bool UI::handleInput( SystemMonitor& mon) {
     std::vector<Process> proc = mon.getProcesses();
-    int total       = (int)proc.size();
-    int visibleRows = getmaxy(procWin) - 3; // minus border + header row
+    int total       = totalDrawn;
+    int visibleRows = getmaxy(procWin) - 4; // minus border + header row
 
     int ch = getch();
     if (ch == ERR) return true;
@@ -99,7 +99,7 @@ bool UI::handleInput( SystemMonitor& mon) {
             break;
     }
      if (!proc.empty() && selectedRow < total)
-        selectedPid = proc[selectedRow].pid;
+        selectedPid = mon.getProcesses()[selectedRow].pid;
     return true;
 }
 
@@ -246,13 +246,13 @@ void UI::drawProcessHeader() {
 
 void UI::drawProcessList(const std::vector<Process>& procs) {
     int visibleRows = getmaxy(procWin) - 4;  // minus top border + header + bottom border
-    int total       = (int)procs.size();
-    int maxOffset   = std::max(0, total - visibleRows);
+    totalDrawn       = (int)procs.size();
+    int maxOffset   = std::max(0, totalDrawn - visibleRows);
     scrollOffset = std::max(0, std::min(scrollOffset, maxOffset));
 
-    for (int i = 0; i < visibleRows && (scrollOffset + i) < total; i++) {
+    for (int i = 0; i < visibleRows && (scrollOffset + i) < totalDrawn; i++) {
         const Process& p = procs[scrollOffset + i];
-        if(p.memoryKB == 0)continue;
+       // if(p.memoryKB == 0)continue;
         int absIdx = scrollOffset + i;
         bool sel   = (absIdx == selectedRow);
         int y      = i + 3;

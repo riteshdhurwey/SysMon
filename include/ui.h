@@ -26,6 +26,7 @@ private:
     int scrollOffset = 0;
     int termRows     = 0;
     int termCols     = 0;
+    int totalDrawn = 0; 
 
     bool paused = false;
     std::chrono::steady_clock::time_point lastKeyTime;
