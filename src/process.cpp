@@ -95,15 +95,16 @@ void ProcessMonitor::update() {
     std::unordered_map<int, long> starttimes;
     long st = 0;
 
-    CPUStats totalA = readCPUStats();
+    auto cpu_map = readCPUStats();
+    CPUStats totalA = cpu_map["cpu"];
     for (int pid : pids){
         cpuA[pid] = readProcessCPU(pid,st); //Save CPU time for each process (snapshot A)
         starttimes[pid] = st;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    CPUStats totalB = readCPUStats();
-
+    auto cpuMap = readCPUStats();
+    CPUStats totalB = cpuMap["cpu"];
         long ticks = sysconf(_SC_CLK_TCK);
         double uptime = 0;
         std::ifstream f("/proc/uptime");

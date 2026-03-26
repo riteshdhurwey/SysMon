@@ -4,6 +4,7 @@
 #include "ResourceMonitor.h"
 #include "process.h"
 #include "network_monitor.h"
+#include "cpu_detail.h"
 
 class SystemMonitor {
 private:
@@ -11,9 +12,11 @@ private:
     ResourceMonitor resource;
     ProcessMonitor processMonitor;
     NetworkMonitor networkMonitor;
+    CPUDetail cpuDetail;
     
 
 public:
+    SystemMonitor() : cpuDetail(&cpu) {}
     void update();
 
     const CPUUsage& getCPUUsage() const;
@@ -31,4 +34,13 @@ public:
      int getTotalZombieProcess() const ;
 
     void sortProcessBy(SortBy criterion);
+
+    //--flags
+    const CPUInfo  getCPUInfo() const;
+
+    const SystemPolicy getSystemPolicy() const;
+
+    const Scheduler getScheduler() const;
+
+    const std::unordered_map<std::string, CpuMetrics> getUsagePerCore()const ;
 };

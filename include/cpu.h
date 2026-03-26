@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>   // std::cout
 #include <fstream>    // std::ifstream
 #include <string>     // std::string
@@ -24,19 +25,19 @@ struct CPUUsage {
 class CPUMonitor {
 private:
    
-    bool firstRun = true;  // Helpful while computing usage
+    bool firstRun = true;  
     CPUStats prevStats;
 
-    // Stores usage in percentage
+    
     CPUUsage currentUsage;
 
-   // CPUStats readStat();
-    // Compute usage between two small time frame
+   friend class CPUDetail;
+    
     CPUStats calculateDelta(const CPUStats& prev,
                             const CPUStats& curr);
-        // raw data of totoal usage of CPU
+
     unsigned long long getTotalDelta(const CPUStats& delta);
-        // convert raw data into percentage 
+
     CPUUsage calculateUsage(const CPUStats& delta);
 
 public:

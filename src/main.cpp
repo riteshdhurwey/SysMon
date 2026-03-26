@@ -1,13 +1,16 @@
 #include "ui.h"
 #include <chrono>
 
-int main() {
+int main(int argc , char* argv[]) {
     SystemMonitor monitor;
     UI ui;
     ui.init();
 
-    monitor.update();  
-
+    monitor.update();
+    for(int i = 0;i<argc;i++){
+        std::string arg = argv[i];
+        if(arg == "--cpu") ui.setdetailed_cpu_enabled();
+    }
     auto lastUpdate = std::chrono::steady_clock::now();
 
     while (true) {
@@ -26,6 +29,7 @@ int main() {
     }
 
     ui.draw(monitor);  
+    std::this_thread::sleep_for(std::chrono::milliseconds(16));
 }
 
     ui.destroy();

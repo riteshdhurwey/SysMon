@@ -61,6 +61,13 @@ Built as a deep-dive into Linux systems programming: `/proc` parsing, delta samp
 | K | Kill selected process |
 | H | Toggle help overlay |
 | Q | Quit |
+| Alt+C | Toggle CPU detail view |
+
+## Launch Flags
+
+| Flag | Action |
+|-----|--------|
+| `--cpu` | Start in CPU detail view |
 
 ---
 
@@ -107,21 +114,26 @@ sysmon/
 ├── include/
 │   ├── CPUUtils.h           # /proc/stat reader (shared)
 │   ├── cpu.h                # CPUMonitor class
+│   ├── cpu_detail.h         # CPUDetail class (per-core, freq, temp, scheduler)
 │   ├── ResourceMonitor.h    # RAM & Disk combined
+│   ├── network_monitor.h    # Network stats
 │   ├── process.h            # ProcessMonitor class
 │   ├── systemMonitor.h      # Top-level monitor
-│   ├── sysinfo.h
+│   ├── sysinfo.h            # Time, uptime utilities
 │   └── ui.h                 # ncurses TUI class
 ├── src/
 │   ├── main.cpp
 │   ├── cpu.cpp
+│   ├── cpu_detail.cpp       # Per-core usage, freq, temp, cache, scheduler
 │   ├── ResourceMonitor.cpp
+│   ├── network_monitor.cpp
 │   ├── process.cpp
 │   ├── systemMonitor.cpp
 │   ├── sysinfo.cpp
 │   └── ui.cpp
 └── tests/
     ├── test_cpu.cpp          # CPUMonitor unit + integration tests
+    ├── test_cpu_detail.cpp   # Per-core, freq, temp, scheduler tests
     ├── test_resource.cpp     # Memory & Disk tests
     └── test_process.cpp      # ProcessMonitor + sort correctness tests
 ```
@@ -237,7 +249,7 @@ make test
 - [x] GitHub Actions CI
 
 ### CPU
-- [ ] `--cpu` flag — detailed CPU stats (per-core usage, frequency)
+- [x] `--cpu` flag — detailed CPU stats (per-core usage, frequency)
 - [ ] Per-core CPU breakdown in TUI
 - [ ] CPU temperature via `/sys/class/thermal`
 

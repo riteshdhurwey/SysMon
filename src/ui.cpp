@@ -90,6 +90,18 @@ bool UI::handleInput( SystemMonitor& mon) {
         case 'k' : case 'K':
             killConfirm = true;
             break;
+
+        case 27 :{
+            int next = getch();
+            if(next != ERR){
+                switch(std::towlower(next)){
+                    case 'c' :
+                        detailed_cpu_enabled = !detailed_cpu_enabled;
+                        break;
+                }
+            }
+            break;
+        }
         case KEY_RESIZE:
             destroyWindows();
             getmaxyx(stdscr, termRows, termCols);
@@ -129,6 +141,7 @@ void UI::createWindows() {
     netWin    = newwin(10,         rightWidth, 1,  rightStart);
     procWin   = newwin(termRows-12,termCols,   11, 0);
     statusWin = newwin(1,          termCols,   termRows-1, 0);
+    detailedCpuwin = newwin(termRows-1, termCols,   1,  0);
 
 }
 
@@ -139,8 +152,9 @@ void UI::destroyWindows() {
     if (cpuWin)    { delwin(cpuWin);    cpuWin    = nullptr; }
     if (procWin)   { delwin(procWin);   procWin   = nullptr; }
     if (statusWin) { delwin(statusWin); statusWin = nullptr; }
-    if (helpWin) { delwin(helpWin); helpWin = nullptr; }
-    if(netWin)  {delwin(netWin); netWin = nullptr;};
+    if (helpWin)   { delwin(helpWin);    helpWin  = nullptr; }
+    if(netWin)     {delwin(netWin);     netWin    = nullptr;};
+    if(detailedCpuwin) { delwin(detailedCpuwin); detailedCpuwin = nullptr;}
 }
 
 
@@ -262,7 +276,7 @@ void UI::drawProcessList(const std::vector<Process>& procs) {
         if (sel) wattron(procWin, A_REVERSE | A_BOLD);
 
         char cpuStr[16];
-        snprintf(cpuStr, sizeof(cpuStr), "%.1f%%", p.cpuPercent);
+        snprintf(cpuStr, sizeof(cpuStr), "%.2f%%", p.cpuPercent);
 
         std::string timeStr = sysinfo.format_ps_time(p.runtime);
         
@@ -323,6 +337,12 @@ void UI::draw(const SystemMonitor& mon) {
     }
 
     drawHeader();
+    
+    if(detailed_cpu_enabled){
+        RenderCPUDetail(mon);
+        return;
+    }
+
     drawDisk(mon.getDiskInfo());
     drawMemory(mon.getMemoryInfo());
     drawCPU(mon.getCPUUsage());
@@ -336,7 +356,7 @@ void UI::draw(const SystemMonitor& mon) {
 
 void UI::drawHelp() {
     if (!helpWin) {
-        int height = 20, width = 46;
+        int height = 24, width = 46; 
         int y = (termRows - height) / 2;
         int x = (termCols - width)  / 2;
         helpWin = newwin(height, width, y, x);
@@ -364,22 +384,27 @@ void UI::drawHelp() {
     wattron(helpWin, A_BOLD);
     mvwprintw(helpWin, 10, 3, "General");
     wattroff(helpWin, A_BOLD);
-    mvwprintw(helpWin,11,3,"%-14s Kill Process","k");
+    mvwprintw(helpWin, 11, 3, "%-14s Kill Process", "k");
     mvwprintw(helpWin, 12, 3, "%-14s Toggle help", "h");
     mvwprintw(helpWin, 13, 3, "%-14s Quit", "q");
 
     wattron(helpWin, A_BOLD);
-    mvwprintw(helpWin, 14, 3, "Info");
+    mvwprintw(helpWin, 15, 3, "Views");              
     wattroff(helpWin, A_BOLD);
-    mvwprintw(helpWin, 15, 3, "%-14s Every 1 second", "Refresh");
-    mvwprintw(helpWin, 16, 3, "%-14s Auto on scroll", "Pause");
-    mvwprintw(helpWin, 17, 3, "%-14s 1s after last key", "Resume");
+    mvwprintw(helpWin, 16, 3, "%-14s Toggle CPU detail", "Alt+C");
+    mvwprintw(helpWin, 17, 3, "%-14s CPU detail on start", "--cpu");
 
-    mvwprintw(helpWin, 19, 3, "Press [H] to close");
+    wattron(helpWin, A_BOLD);
+    mvwprintw(helpWin, 19, 3, "Info");
+    wattroff(helpWin, A_BOLD);
+    mvwprintw(helpWin, 20, 3, "%-14s Every 1 second", "Refresh");
+    mvwprintw(helpWin, 21, 3, "%-14s Auto on scroll", "Pause");
+    mvwprintw(helpWin, 22, 3, "%-14s 1s after last key", "Resume");
+
+    mvwprintw(helpWin, 23, 3, "Press [H] to close");  
 
     wrefresh(helpWin);
 }
-
 void UI::drawKill(int pid,std::string procName) {
     if (!killWin) {
         int height = 6, width = 46;
@@ -427,4 +452,130 @@ for (const auto& iface : info.stat) {
               info.tcpConnections, info.udpConnections);
 
     wrefresh(netWin);
+}
+
+
+void UI::drawDetailedCpu(const CPUInfo & data){
+
+    drawWinTitle(detailedCpuwin,"CPU");
+
+    wattron(detailedCpuwin, COLOR_PAIR(C_DIM));
+    mvwprintw(detailedCpuwin,1,2,"Model    : %-10s | %dC / %dT | %-5s ",
+        data.model_name.c_str(),
+        data.physical_cores,
+        data.logical_threads,
+        data.architecture.c_str());
+        wattroff(detailedCpuwin,COLOR_PAIR(C_DIM));
+        
+}
+
+void UI::drawSysPolicy(const SystemPolicy & data){
+    wattron(detailedCpuwin, COLOR_PAIR(C_DIM));
+    mvwprintw(detailedCpuwin,2,2,"Governor : %-5s | Boost :%-2s ",data.governor.c_str(),
+    data.boost.c_str());
+    mvwprintw(detailedCpuwin,3,2,"Load Avg : %.2f %2.2f %.2f",
+        data.load_1min,
+        data.load_5min,
+        data.load_15min);
+    wattroff(detailedCpuwin,COLOR_PAIR(C_DIM));
+    
+
+    
+}
+
+void UI::drawoverallCPU(const CPUUsage& cpu,double temp) {
+    int bw = (termCols / 2) - 10;
+    mvwprintw(detailedCpuwin, 5, 2, "CPU ");
+    drawBar(detailedCpuwin, 5, 10, bw, cpu.total);
+    mvwprintw(detailedCpuwin, 5, 10 + bw + 3, "%5.1f%%", cpu.total);
+    if (temp > 0.0)
+        mvwprintw(detailedCpuwin, 5, 10 + bw + 12, "%.1fC", temp);
+    wattron(detailedCpuwin, COLOR_PAIR(C_DIM));
+    mvwprintw(detailedCpuwin, 6, 2, "usr:%4.1f%%  sys:%4.1f%%  idl:%4.1f%%  iow:%4.1f%%",
+              cpu.user, cpu.system, cpu.idle, cpu.iowait);
+    wattroff(detailedCpuwin, COLOR_PAIR(C_DIM));
+
+  
+}
+
+int UI::drawPerCore(const std::unordered_map<std::string, CpuMetrics>& data) {
+    int bw = (termCols) / 2 - 10;
+    int y = 8;
+    int maxY, maxX;
+    getmaxyx(detailedCpuwin, maxY, maxX);
+
+    std::vector<std::pair<std::string, CpuMetrics>> sorted(data.begin(), data.end());
+    std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
+        auto getNum = [](const std::string& s) {
+            try {
+                if (s.size() <= 3) return -1;
+                return std::stoi(s.substr(3));
+            } catch (...) { return -1; }
+        };
+        return getNum(a.first) < getNum(b.first);
+    });
+
+    for (const auto& [label, metrics] : sorted) {
+        if (label == "cpu") continue;
+        if (y >= maxY - 1) break;
+        mvwprintw(detailedCpuwin, y, 2, "%-4s", label.c_str());
+        drawBar(detailedCpuwin, y, 10, bw, metrics.usage_percent);
+        mvwprintw(detailedCpuwin, y, 10 + bw + 3, "%5.1f%%  %5.2f GHz",
+            metrics.usage_percent, metrics.frequency_ghz);
+        y++;
+    }
+    return y;  
+}
+
+void UI::drawScheduler(const Scheduler& data, int y) {
+    int maxY, maxX;
+    getmaxyx(detailedCpuwin, maxY, maxX);
+    if (y >= maxY - 1) return;
+
+    mvwprintw(detailedCpuwin, y, 2, "CTX: %-6ld  IRQ: %-6ld  Run: %-3d  Blk: %-3d",
+        data.ctxt_per_sec,
+        data.irqs_per_sec,
+        data.procs_running,
+        data.procs_blocked);
+}
+
+void UI::drawCacheAndFeatures(const CPUInfo& data, int y) {
+    int maxY, maxX;
+    getmaxyx(detailedCpuwin, maxY, maxX);
+    if (y >= maxY - 1) return;
+
+    wattron(detailedCpuwin, COLOR_PAIR(C_DIM));
+
+    mvwprintw(detailedCpuwin, y, 2, "Cache : %s", data.caches_info.c_str());
+
+    if (y + 1 < maxY - 1)
+        mvwprintw(detailedCpuwin, y + 1, 2, "VIRT:%-3s  AES:%-3s  AVX2:%-3s  SMT:%-3s",
+            (data.has_vmx || data.has_svm) ? "ON" : "OFF",
+            data.has_aes  ? "ON" : "OFF",
+            data.has_avx2 ? "ON" : "OFF",
+            data.has_smt  ? "ON" : "OFF");
+
+    wattroff(detailedCpuwin, COLOR_PAIR(C_DIM));
+}
+
+
+void UI::RenderCPUDetail(const SystemMonitor& mon) {
+    if (!detailedCpuwin) return;
+    werase(detailedCpuwin);
+
+    double temp = -1.0;
+    const auto& metrics = mon.getUsagePerCore();
+    auto it = metrics.find("cpu");
+    if (it != metrics.end())
+        temp = it->second.temperature_c;
+
+    drawDetailedCpu(mon.getCPUInfo());
+    drawSysPolicy(mon.getSystemPolicy());
+    drawoverallCPU(mon.getCPUUsage(), temp);
+
+    int nextY = drawPerCore(metrics);        
+    drawCacheAndFeatures(mon.getCPUInfo(), nextY);     
+    drawScheduler(mon.getScheduler(), nextY + 2);  
+
+    wrefresh(detailedCpuwin);
 }

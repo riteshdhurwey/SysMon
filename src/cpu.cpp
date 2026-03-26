@@ -48,7 +48,8 @@ const CPUUsage &CPUMonitor::getUsage()const{
 }
 
 void CPUMonitor::update(){
-    CPUStats curr = readCPUStats();
+    auto cpu_map = readCPUStats();
+    CPUStats curr = cpu_map["cpu"];
     if(firstRun){
         prevStats = curr;
         firstRun = false;

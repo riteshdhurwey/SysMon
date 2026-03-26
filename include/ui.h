@@ -3,10 +3,13 @@
 #include <ncurses.h>
 #include <string>
 #include <vector>
+
 #include "systemMonitor.h"
 #include"sysinfo.h"
+
 #include<chrono>
 #include<signal.h>
+
 
 class UI {
 private:
@@ -20,6 +23,9 @@ private:
     WINDOW* helpWin   = nullptr;
     WINDOW* killWin = nullptr;
     WINDOW* netWin = nullptr;
+
+    WINDOW* detailedCpuwin = nullptr;
+    WINDOW* sysPolicyWin = nullptr;
     // state
     int selectedPid  = -1;
     int selectedRow  = 0;
@@ -58,6 +64,15 @@ private:
     void drawKill(int pid,std::string procName);
     void drawNetStat(const NetworkInfo& info);
 
+    //--flags
+    int  drawPerCore(const std::unordered_map<std::string, CpuMetrics>& data);
+    void drawCacheAndFeatures(const CPUInfo& data, int y);
+    void drawScheduler(const Scheduler& data, int y);
+    void drawDetailedCpu(const CPUInfo &data);
+    void drawSysPolicy(const SystemPolicy &data);
+    void drawoverallCPU(const CPUUsage& cpu,double temp);
+    bool detailed_cpu_enabled = false;
+
     sysInfo sysinfo;
 
 public:
@@ -68,6 +83,10 @@ public:
 
     bool isPaused() const { return paused; }
     void setPaused(bool val) { paused = val; }
+    void RenderCPUDetail(const SystemMonitor &mon);
+    
+
+    void setdetailed_cpu_enabled(){detailed_cpu_enabled = !detailed_cpu_enabled;};
     std::chrono::steady_clock::time_point getLastKeyTime() const { return lastKeyTime; }
     
 };

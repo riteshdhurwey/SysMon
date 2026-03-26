@@ -20,6 +20,8 @@ void SystemMonitor::update(){
     resource.update();
     processMonitor.update();
     networkMonitor.update();
+
+    cpuDetail.update();
 }
 
 const NetworkInfo& SystemMonitor::getNetStat() const{
@@ -37,3 +39,19 @@ void SystemMonitor::sortProcessBy(SortBy criterion){
   int SystemMonitor::getTotalZombieProcess() const{
     return processMonitor.getZombieProcess();
  }
+
+ const CPUInfo SystemMonitor::getCPUInfo() const{
+    return cpuDetail.getCPUInfo();
+ }
+
+ const SystemPolicy SystemMonitor::getSystemPolicy() const{
+    return cpuDetail.getSystemPolicy();
+ }
+
+ const std::unordered_map<std::string, CpuMetrics> SystemMonitor::getUsagePerCore()const {
+    return cpuDetail.getUsagePerCore();
+}
+
+const Scheduler SystemMonitor::getScheduler() const{
+    return cpuDetail.getScheduler();
+}
