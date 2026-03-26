@@ -250,8 +250,8 @@ make test
 
 ### CPU
 - [x] `--cpu` flag — detailed CPU stats (per-core usage, frequency)
-- [ ] Per-core CPU breakdown in TUI
-- [ ] CPU temperature via `/sys/class/thermal`
+- [x] Per-core CPU breakdown in TUI
+- [x] CPU temperature via `/sys/class/thermal`
 
 ### Memory
 - [ ] `--mem` flag — detailed memory breakdown (cached, buffers, swap usage)
