@@ -31,13 +31,13 @@ DiskUsage ResourceMonitor::readDiskInfo(){
     }
 
     unsigned long long total = buf.f_blocks * buf.f_frsize;
-    unsigned long long free  = buf.f_bfree  * buf.f_frsize;
-    unsigned long long used  = total - free;
+    unsigned long long free  = buf.f_bavail  * buf.f_frsize;
+    unsigned long long used  = (buf.f_blocks - buf.f_bfree) * buf.f_frsize;
 
     data.totalGB = total / (1024.0 * 1024 * 1024);
     data.freeGB  = free  / (1024.0 * 1024 * 1024);
     data.usedGB  = used  / (1024.0 * 1024 * 1024);
-    data.percent = (double)used / total * 100.0;
+    data.percent = (double)used / (used+free) * 100.0;
 
     return data;
 }
